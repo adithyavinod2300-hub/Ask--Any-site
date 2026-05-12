@@ -144,6 +144,7 @@ export default function ChatPage() {
   ]);
 
   const [input, setInput] = useState("");
+  const [url, setUrl] = useState("");   // ✅ correct
   const [loading, setLoading] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -154,6 +155,10 @@ export default function ChatPage() {
 
   const handleSend = async () => {
     const text = input.trim();
+      if (!url) {
+       alert("Please enter a website URL");
+       return;
+      }
     if (!text || loading) return;
 
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", text, ts: new Date() };
@@ -165,7 +170,10 @@ export default function ChatPage() {
       const res = await fetch("http://127.0.0.1:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+         message: text,
+         url: url,
+        }),
       });
       const data = await res.json();
       setMessages((prev) => [
@@ -358,6 +366,22 @@ export default function ChatPage() {
                 transition: "border-color 0.2s",
               }}
             >
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Enter website URL (https://...)"
+                style={{
+                 width: "100%",
+                 marginBottom: 8,
+                 padding: "10px 14px",
+                 borderRadius: 12,
+                 border: "1px solid rgba(255,255,255,0.08)",
+                 background: "rgba(255,255,255,0.04)",
+                 color: "#e2e8f0",
+                 fontSize: 13,
+                 outline: "none",
+                }}
+             />
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
