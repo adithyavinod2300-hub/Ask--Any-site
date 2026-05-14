@@ -1,240 +1,202 @@
-🚀 Ask Any Site AI
-🔍 Intelligent Web Chatbot using RAG + Recursive Scraping
-🧠 Overview
-Ask Any Site AI is an intelligent chatbot that can:
+🚀 Ask Any Website AI  
+**AI-powered website explorer using RAG (Retrieval-Augmented Generation)**
 
-🌐 Ingest any website URL
+---
 
-🔁 Recursively crawl and extract content from linked pages
+## 📌 Project Description
 
-🧩 Convert raw content into structured knowledge
+Ask Any Website AI is a full-stack application that allows users to input any website URL and ask questions about it.
 
-🤖 Answer user questions using Retrieval-Augmented Generation (RAG)
+The system:
+- Recursively scrapes the website
+- Extracts meaningful content
+- Converts it into embeddings
+- Uses RAG (Retrieval-Augmented Generation) to answer questions accurately
 
-The system ensures high accuracy, low latency, and zero hallucination bias by grounding responses strictly in scraped content.
+This enables users to explore websites like a chatbot — understanding content, features, pricing, and more instantly.
 
-🎯 Problem Statement
-Traditional chatbots:
+---
 
-❌ Lack real-time website understanding
+## ⚙️ Features
 
-❌ Hallucinate answers
+- 🌐 Recursive website scraping (multi-page)
+- 🧠 Semantic search using embeddings
+- 💬 Context-aware AI answers
+- ⚡ Latency optimization using context trimming
+- 🔁 Auto-ingestion of new URLs
+- 📚 Source-based answers with references
 
-❌ Cannot handle dynamic or multi-page websites
+---
 
-✅ Solution
-We built a system that:
+## 🧠 Solution Approach
 
-Scrapes multiple pages from a website (not just homepage)
+### 1. Scraping
+- Used **Playwright** for dynamic websites
+- Recursive crawler limited to same domain
+- Removed unnecessary elements (scripts, styles, etc.)
+- Blocked heavy assets → faster scraping
 
-Cleans and structures unstructured web data
+### 2. Key Engineering Challenge (Windows + Python 3.14)
+- Playwright requires `ProactorEventLoop`
+- FastAPI uses `SelectorEventLoop`
 
-Stores knowledge using embeddings
+❌ Conflict causes crashes
 
-Retrieves only relevant context for each query
+✅ Solution:
+- Ran Playwright in a **separate thread with its own event loop**
+- Fully isolated → stable execution
 
-Generates accurate answers using LLMs
+---
 
-⚙️ Architecture
-User → FastAPI → Scraper (Playwright)
-                   ↓
-               Clean Text
-                   ↓
-               Chunking
-                   ↓
-             Embeddings
-                   ↓
-             Vector Search
-                   ↓
-             Gemini LLM
-                   ↓
-                Response
-🔥 Key Features
-🌐 Recursive Web Scraping
-Scrapes multiple internal pages (not just landing page)
+### 3. RAG Pipeline
 
-Handles modern JS-heavy sites using Playwright
+URL → Scraping → Chunking → Embeddings → Retrieval → AI Response
 
-Filters irrelevant assets (images, CSS, etc.)
+- Split content into chunks
+- Generated embeddings using Gemini
+- Used cosine similarity for retrieval
+- Passed only top relevant chunks to model
 
-Avoids duplicate URLs via normalization
+---
 
-🧠 RAG (Retrieval-Augmented Generation)
-Splits content into meaningful chunks
+### 4. Latency Optimization ⚡
 
-Converts chunks into embeddings
+```python
+context_text = context_text[:2000]
 
-Uses cosine similarity for retrieval
+Reduces token usage
 
-Sends only relevant context to LLM
+Speeds up response time
 
-⚡ Latency Optimization
-Context size limited to ~2000 characters
+Keeps system efficient
 
-Reduces token usage + speeds up responses
 
-context_text = "\n\n".join(context_parts)[:2000]
 
-📌 Why this matters:
+---
 
-Faster responses ⚡
+🖥️ Tech Stack
 
-Lower cost 💰
+Backend
 
-No quality loss 🎯
+FastAPI
 
-🧵 Smart Async + Threading (Advanced Engineering)
-Problem:
+Playwright
 
-Playwright requires ProactorEventLoop (Windows)
+Google Gemini API
 
-FastAPI uses SelectorEventLoop
+NumPy
 
-💡 Solution:
 
-Run scraper in a separate thread with isolated event loop
+Frontend
 
-loop.run_in_executor(...)
-👉 Prevents crashes and ensures stability across environments
+Modern UI (React-based)
 
-📊 Source-Aware Responses
-Every answer is grounded in scraped content
 
-Returns source URLs for transparency
 
-🔁 Auto-Ingestion
-If user asks a question without indexing:
-→ system automatically scrapes + indexes the site
+---
 
-🧠 In-Memory Vector Store
-Lightweight and fast
+📦 Setup & Usage
 
-Session-based indexing using domain hash
+1. Clone the repository
 
-No external DB needed (hackathon optimized)
+git clone https://github.com/your-username/Ask-Any-site-AI.git
+cd Ask-Any-site-AI
 
-🧪 Example Workflow
-User inputs:
 
-https://example.com
-System:
+---
 
-Scrapes 5–6 pages
+2. Create virtual environment
 
-Extracts content
+python -m venv venv
+venv\Scripts\activate   # Windows
 
-Builds embeddings
 
-User asks:
+---
 
-"What pricing plans are available?"
-System:
+3. Install dependencies (manual)
 
-Retrieves relevant chunks
+pip install fastapi uvicorn playwright python-dotenv numpy google-generativeai pydantic
 
-Sends to LLM
 
-Returns accurate answer with sources
+---
 
-🚧 Challenges & Solutions
-❗ Problem: Dynamic websites (JS-heavy)
-✔ Solution:
+4. Install Playwright browsers
 
-Used Playwright instead of requests/BeautifulSoup
+playwright install
 
-❗ Problem: Event loop conflicts (Windows + Python 3.14)
-✔ Solution:
 
-Isolated Playwright in separate thread with its own loop
+---
 
-❗ Problem: Irrelevant noisy content
-✔ Solution:
+5. Setup environment variables
 
-Removed:
+Create .env file:
 
-scripts
+GEMINI_API_KEY=your_api_key_here
 
-styles
 
-nav/footer
+---
 
-hidden elements
+6. Run backend
 
-❗ Problem: High latency with large context
-✔ Solution:
+cd backend
+uvicorn main:app --reload
 
-Limited context before LLM call (2000 chars)
 
-❗ Problem: Duplicate pages
-✔ Solution:
+---
 
-URL normalization + visited tracking
+7. Run frontend
 
-🛠️ Tech Stack
-Backend: FastAPI
+cd frontend 
+npm install
+npm run dev
 
-Scraping: Playwright
 
-LLM: Gemini API
+---
 
-Embeddings: Gemini Embedding Model
+📡 API Endpoints
 
-Vector Search: NumPy (cosine similarity)
+POST /ingest → Scrape and index website
 
-Async Handling: asyncio + threading
+POST /chat → Ask questions
 
-📦 API Endpoints
-🔹 /ingest
-Scrape and index a website
+GET /status/{session_id} → Check status
 
-POST /ingest
-{
-  "url": "https://example.com"
-}
-🔹 /chat
-Ask questions about the site
+DELETE /clear/{session_id} → Clear session
 
-POST /chat
-{
-  "url": "https://example.com",
-  "message": "What does this site offer?"
-}
-🔹 /status/{session_id}
-Check indexing status
 
-🔹 /clear/{session_id}
-Clear stored data
 
-🚀 What Makes This Project Stand Out
-🔁 Recursive multi-page scraping (not basic scraping)
+---
 
-🧠 Full RAG pipeline implemented from scratch
+🚧 Challenges Solved
 
-⚡ Latency-aware architecture
+Playwright crashing → fixed with thread-based event loop
 
-🧵 Advanced async + threading solution
+Slow scraping → blocked heavy assets
 
-🎯 Zero hallucination design (strict context grounding)
+Noisy data → cleaned DOM before extraction
 
-🪶 Lightweight (no external vector DB)
+Duplicate pages → URL normalization
 
-📌 Future Improvements
-Streaming responses (real-time typing effect)
+Latency → limited context size
 
-Multi-website querying
 
-Persistent vector database
 
-UI with source highlighting
+---
 
-🏁 Conclusion
-This project demonstrates how modern AI systems can:
+🌟 Highlights
 
-Understand real-world websites
+Works on real-world JS-heavy websites
 
-Extract meaningful knowledge
+Full RAG pipeline from scratch
 
-Provide accurate, explainable answers
+Optimized for performance + accuracy
 
-👉 Built with a focus on performance, reliability, and real-world usability
+Handles async + threading issues
 
+
+
+---
+
+📌 Note
+
+This project was built during a hackathon, so dependencies are installed manually instead of using a requirements.txt file.
