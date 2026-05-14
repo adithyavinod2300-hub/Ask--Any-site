@@ -27,9 +27,8 @@ app.add_middleware(
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# ── YOUR MODELS — unchanged ──
 MODELS_TO_TRY = [
-    "gemini-3.1-flash-lite-preview",
+    "gemini-3.1-flash-lite",
     "gemini-3-flash-preview",
     "gemini-2.5-flash",
 ]
@@ -396,7 +395,7 @@ async def call_gemini(question: str, context_chunks: list[dict], site_title: str
                 seen_urls.add(url)
                 context_parts.append(f"\n[Source: {chunk['title']} — {url}]")
             context_parts.append(chunk["text"])
-        context_text = "\n\n".join(context_parts)
+        context_text = "\n\n".join(context_parts)[:2000]
 
     full_prompt = f"""You are a helpful AI assistant for the website: {site_title}.
 
